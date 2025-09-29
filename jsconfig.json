@@ -3,5 +3,11 @@
     "paths": {
       "@/*": ["./*"]
     }
+  },
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "jsx": "preserve"
   }
 }

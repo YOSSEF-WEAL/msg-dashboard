@@ -13,10 +13,7 @@ export default async function dashboardPage() {
 
   return (
     <div className="">
-      <p>
-        Hello - <span>{data.claims.email}</span>
-      </p>
-      <LogoutButton />
+
     </div>
   );
 }
