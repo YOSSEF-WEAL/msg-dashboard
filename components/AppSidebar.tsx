@@ -1,12 +1,10 @@
 "use client";
 
 import {
-  ChevronDown,
   ChevronUp,
   LayoutDashboard,
   Inbox,
-  Plus,
-  Projector,
+  Building2,
   ShieldPlus ,
   Settings,
   User2,
@@ -40,12 +38,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible";
-
 
 // Menu items.
 const items = [
@@ -60,14 +52,19 @@ const items = [
     icon: ShieldPlus ,
   },
   {
-    title: "Inbox",
-    url: "#",
-    icon: Inbox,
+    title: "Company",
+    url: "/company",
+    icon: Building2,
   },
   {
     title: "Settings",
     url: "#",
     icon: Settings,
+  },
+  {
+    title: "Inbox",
+    url: "#",
+    icon: Inbox,
   },
 ];
 
@@ -75,7 +72,7 @@ export default function AppSidebar() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
-  console.log(user);
+
 
   async function handleLogout() {
     const { error } = await logout();
@@ -135,94 +132,40 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Projects</SidebarGroupLabel>
-          <SidebarGroupAction>
-            <Plus /> <span className="sr-only">Add Project</span>
-          </SidebarGroupAction>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/#">
-                    <Projector />
-                    See All Projects
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href="/#">
-                    <Plus />
-                    Add Projects
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        {/* Collapsible */}
-        <Collapsible defaultOpen className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel asChild>
-              <CollapsibleTrigger>
-                Collapsable
-                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link href="/#">
-                        <Projector />
-                        See All Projects
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild>
-                      <Link href="/#">
-                        <Plus />
-                        Add Projects
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="" tooltip={undefined}>
-                  {user ? (
-                    <>
-                      <Avatar className="size-6">
-                        <AvatarImage className="" src={avatarUrl} alt={displayName} />
-                        <AvatarFallback className="">{initials}</AvatarFallback>
-                      </Avatar>
-                      <span>{displayName}</span>
-                      <ChevronUp className="ml-auto" />
-                    </>
-                  ) : (
-                    <>
-                      <User2 />
-                      <span>Account</span>
-                      <ChevronUp className="ml-auto" />
-                    </>
-                  )}
+                <SidebarMenuButton asChild>
+                  <button type="button">
+                    {user ? (
+                      <>
+                        <Avatar className="size-6">
+                          <AvatarImage className="" src={avatarUrl} alt={displayName} />
+                          <AvatarFallback className="">{initials}</AvatarFallback>
+                        </Avatar>
+                        <span>{displayName}</span>
+                        <ChevronUp className="ml-auto" />
+                      </>
+                    ) : (
+                      <>
+                        <User2 />
+                        <span>Account</span>
+                        <ChevronUp className="ml-auto" />
+                      </>
+                    )}
+                  </button>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={10}>
                 {user && (
                   <>
+                    <Link href="/account">
                     <DropdownMenuItem>Account</DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                   </>
                 )}

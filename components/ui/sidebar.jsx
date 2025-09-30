@@ -302,8 +302,11 @@ function SidebarInput({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarHeader({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -315,8 +318,11 @@ function SidebarHeader({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarFooter({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -328,8 +334,11 @@ function SidebarFooter({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarSeparator({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -341,8 +350,11 @@ function SidebarSeparator({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarContent({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -357,8 +369,11 @@ function SidebarContent({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarGroup({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -370,8 +385,11 @@ function SidebarGroup({
   );
 }
 
+/**
+ * @param {{ className?: string, asChild?: boolean } & Record<string, any>} props
+ */
 function SidebarGroupLabel({
-  className,
+  className = undefined,
   asChild = false,
   ...props
 }) {
@@ -390,8 +408,11 @@ function SidebarGroupLabel({
   );
 }
 
+/**
+ * @param {{ className?: string, asChild?: boolean } & Record<string, any>} props
+ */
 function SidebarGroupAction({
-  className,
+  className = undefined,
   asChild = false,
   ...props
 }) {
@@ -412,8 +433,11 @@ function SidebarGroupAction({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarGroupContent({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -425,8 +449,11 @@ function SidebarGroupContent({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarMenu({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -438,8 +465,11 @@ function SidebarMenu({
   );
 }
 
+/**
+ * @param {{ className?: string } & Record<string, any>} props
+ */
 function SidebarMenuItem({
-  className,
+  className = undefined,
   ...props
 }) {
   return (
@@ -473,13 +503,24 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
+/**
+ * @param {{
+ *  asChild?: boolean,
+ *  isActive?: boolean,
+ *  variant?: string,
+ *  size?: string,
+ *  tooltip?: any,
+ *  className?: string,
+ *  [key: string]: any
+ * }} props
+ */
 function SidebarMenuButton({
   asChild = false,
   isActive = false,
   variant = "default",
   size = "default",
-  tooltip,
-  className,
+  tooltip = undefined,
+  className = undefined,
   ...props
 }) {
   const Comp = asChild ? Slot : "button"
@@ -546,7 +587,7 @@ function SidebarMenuAction({
 }
 
 function SidebarMenuBadge({
-  className,
+  className = undefined,
   ...props
 }) {
   return (

@@ -13,10 +13,7 @@ export default async function page() {
 
   return (
     <div className="">
-      <p>
-        Hello - <span>{data.claims.email}</span>
-      </p>
-      <LogoutButton />
+account
     </div>
   );
 }
