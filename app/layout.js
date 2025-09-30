@@ -5,6 +5,7 @@ import AppSidebar from "@/components/AppSidebar";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,27 +28,26 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased `}
       >
-          <ThemeProvider
+        <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
           <AuthProvider>
+            <Toaster />
             <SidebarProvider>
               <AppSidebar />
+
               <main className="w-full h-svh flex flex-col overflow-hidden">
                 <div className="sticky top-0 z-40 bg-background border-b">
                   <Navbar />
                 </div>
-                <div className="flex-1 overflow-auto p-8">
-                  {children}
-                </div>
+                <div className="flex-1 overflow-auto p-8">{children}</div>
               </main>
             </SidebarProvider>
           </AuthProvider>
         </ThemeProvider>
-
       </body>
     </html>
   );

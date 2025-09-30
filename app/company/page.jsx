@@ -22,12 +22,13 @@ export default async function page() {
   const countrys = await getCountrys();
   const industrys = await getIndustrys();
   const paymentMethods = await getPaymentMethods();
-
-  console.log("client data", client);
-  console.log("companyInformation data", companyInformation);
-  console.log("countrys data", countrys);
-  console.log("industrys data", industrys);
-  console.log("paymentMethods data", paymentMethods);
+  /*
+console.log("client data", client);
+console.log("companyInformation data", companyInformation);
+console.log("countrys data", countrys);
+console.log("industrys data", industrys);
+console.log("paymentMethods data", paymentMethods);
+*/
 
   return (
     <div className="">
