@@ -6,7 +6,7 @@ import { createClient } from "@/lib/server";
 export async function updateCompanyInformation(data) {
   try {
     const supabase = await createClient();
-    
+
     const companyData = {
       company_name: data.company_name,
       email: data.email,
@@ -37,7 +37,7 @@ export async function updateCompanyInformation(data) {
       };
     }
 
-    revalidatePath("/dashboard/company");
+    revalidatePath("/company");
 
     return {
       success: true,
@@ -55,11 +55,9 @@ export async function updateCompanyInformation(data) {
 
 export async function uploadCompanyLogo(formData) {
   try {
-
     const supabase = await createClient();
     const file = formData.get("file");
     const clientId = formData.get("client_id");
-
 
     if (!file || !clientId) {
       return { success: false, error: "File and client ID are required" };
@@ -81,7 +79,6 @@ export async function uploadCompanyLogo(formData) {
       return { success: false, error: uploadError.message };
     }
 
-
     // الحصول على URL العام
     const { data: urlData } = supabase.storage
       .from("logos")
@@ -102,7 +99,7 @@ export async function uploadCompanyLogo(formData) {
 
     console.log("✅ Database updated:", updateData);
 
-    revalidatePath("/dashboard/company");
+    revalidatePath("/company");
 
     return {
       success: true,
