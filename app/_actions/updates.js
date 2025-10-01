@@ -79,7 +79,6 @@ export async function uploadCompanyLogo(formData) {
       return { success: false, error: uploadError.message };
     }
 
-    // الحصول على URL العام
     const { data: urlData } = supabase.storage
       .from("logos")
       .getPublicUrl(filePath);
@@ -97,7 +96,6 @@ export async function uploadCompanyLogo(formData) {
       return { success: false, error: updateError.message };
     }
 
-    console.log("✅ Database updated:", updateData);
 
     revalidatePath("/company");
 
@@ -108,6 +106,57 @@ export async function uploadCompanyLogo(formData) {
     };
   } catch (error) {
     console.error("🔥 uploadCompanyLogo unexpected error:", error);
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred",
+    };
+  }
+}
+
+export async function updateAccountInformation(data) {
+  try {
+    const supabase = await createClient();
+    const accountData = {
+      name: data.name,
+      email: data.email,
+      is_active: data.is_active,
+    };
+
+    const clientId = data.client_id;
+
+    if (!clientId) {
+      return { success: false, error: "Client ID is missing" };
+    }
+
+    const { data: accountUpdateData, error: accountError } = await supabase
+      .from("clients")
+      .update(accountData)
+      .eq("id", clientId).select(`
+        *,
+        roles (*),
+        company_id (
+          company_name,
+          logo_url
+        )
+      `);
+
+    if (accountError) {
+      console.error("❌ Account update error:", accountError);
+      return {
+        success: false,
+        error: accountError.message || "Failed to update account information",
+      };
+    }
+
+    revalidatePath("/dashboard/account");
+
+    return {
+      success: true,
+      message: "Account information updated successfully",
+      data: { account: accountUpdateData },
+    };
+  } catch (error) {
+    console.error("🔥 updateAccountInformation unexpected error:", error);
     return {
       success: false,
       error: error.message || "An unexpected error occurred",

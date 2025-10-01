@@ -107,3 +107,34 @@ export async function getRoles() {
 
   return roles ?? null;
 }
+
+export async function getClientWithDetails(userId) {
+  if (!userId) {
+    throw new Error("getClientWithDetails: userId is required");
+  }
+
+  const supabase = await createServerSupabase();
+
+  let { data: clients, error } = await supabase
+    .from("clients")
+    .select(
+      `
+      *,
+      roles (*),
+      company_id (
+        company_name,
+        logo_url
+        )
+        `
+    )
+    .eq("user_id", userId)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("getClientWithDetails error:", error);
+    throw new Error("Failed to load client details");
+  }
+
+  return clients ?? null;
+}
