@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/client";
 
@@ -39,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [pathname]
   );
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     const supabase = createClient();
     setLoading(true);
     setError(null);
@@ -68,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isUnprotected, router]); // أضف dependencies هنا
 
   useEffect(() => {
     refresh();
@@ -80,12 +87,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       sub.subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [refresh, pathname]); // أضف refresh هنا
 
   const value = useMemo<AuthContextValue>(
     () => ({ user, claims, loading, error, refresh }),
-    [user, claims, loading, error]
+    [user, claims, loading, error, refresh] // أضف refresh هنا
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
