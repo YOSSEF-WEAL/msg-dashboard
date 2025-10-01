@@ -2,7 +2,6 @@
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import ComboboxCompanyForm from "./ComboboxCompanyForm";
 import { Button } from "./ui/button";
 import { useFormStatus } from "react-dom";
@@ -10,6 +9,7 @@ import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { updateCompanyInformation } from "@/app/_actions/updates";
 import { toast } from "sonner";
+import LogoUpload from "./LogoUpload";
 
 function SubmitButtons() {
   const { pending } = useFormStatus();
@@ -41,9 +41,12 @@ export default function CompanyForm({
   paymentMethods,
 }) {
   const [isPending, startTransition] = useTransition();
+
   const handleSubmit = async (formData) => {
     const plainData = Object.fromEntries(formData.entries());
     plainData.client_id = client?.id;
+
+
     startTransition(async () => {
       try {
         const result = await updateCompanyInformation(plainData);
@@ -76,22 +79,13 @@ export default function CompanyForm({
         onReset={handleReset}
         className="flex flex-row flex-wrap gap-4"
       >
-        <div className="w-full">
-          <Image
-            src={companyInformation?.logo_url || "/placeholder-logo.png"}
-            alt={companyInformation?.company_name ?? "LOGO COMPANY"}
-            width={50}
-            height={50}
-          />
-        </div>
-
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="company_name">company Name</Label>
+          <Label htmlFor="company_name">Company Name</Label>
           <Input
             type="text"
             id="company_name"
             name="company_name"
-            placeholder="company Name"
+            placeholder="Company Name"
             defaultValue={companyInformation?.company_name ?? ""}
             disabled={isPending}
             required
@@ -99,12 +93,12 @@ export default function CompanyForm({
         </div>
 
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="email">email</Label>
+          <Label htmlFor="email">Email</Label>
           <Input
             type="email"
             id="email"
             name="email"
-            placeholder="email"
+            placeholder="Email"
             defaultValue={companyInformation?.email ?? ""}
             disabled={isPending}
             required
@@ -112,43 +106,43 @@ export default function CompanyForm({
         </div>
 
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="address">address</Label>
+          <Label htmlFor="address">Address</Label>
           <Input
             type="text"
             id="address"
             name="address"
-            placeholder="address"
+            placeholder="Address"
             defaultValue={companyInformation?.address ?? ""}
             disabled={isPending}
           />
         </div>
 
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="phone_number">phone Number</Label>
+          <Label htmlFor="phone_number">Phone Number</Label>
           <Input
             type="tel"
             id="phone_number"
             name="phone_number"
-            placeholder="phone Number"
+            placeholder="Phone Number"
             defaultValue={companyInformation?.phone_number ?? ""}
             disabled={isPending}
           />
         </div>
 
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="whatsapp_number">whatsapp Number</Label>
+          <Label htmlFor="whatsapp_number">WhatsApp Number</Label>
           <Input
             type="tel"
             id="whatsapp_number"
             name="whatsapp_number"
-            placeholder="whatsapp Number"
+            placeholder="WhatsApp Number"
             defaultValue={companyInformation?.whatsapp_number ?? ""}
             disabled={isPending}
           />
         </div>
 
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="country">country</Label>
+          <Label htmlFor="country">Country</Label>
           <ComboboxCompanyForm
             name="country"
             data={countrys}
@@ -158,7 +152,7 @@ export default function CompanyForm({
         </div>
 
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="industry">industry</Label>
+          <Label htmlFor="industry">Industry</Label>
           <ComboboxCompanyForm
             name="industry"
             data={industrys}
@@ -168,7 +162,7 @@ export default function CompanyForm({
         </div>
 
         <div className="w-full md:w-[31%] flex flex-col gap-2">
-          <Label htmlFor="payment_method">payment Method</Label>
+          <Label htmlFor="payment_method">Payment Method</Label>
           <ComboboxCompanyForm
             name="payment_method"
             data={paymentMethods}
@@ -178,6 +172,13 @@ export default function CompanyForm({
         </div>
 
         <SubmitButtons />
+
+        <div className="w-full mt-4">
+          <LogoUpload
+            clientId={client?.id}
+            currentLogo={companyInformation?.logo_url}
+          />
+        </div>
       </form>
     </>
   );

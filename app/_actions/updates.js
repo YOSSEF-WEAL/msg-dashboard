@@ -5,10 +5,8 @@ import { createClient } from "@/lib/server";
 
 export async function updateCompanyInformation(data) {
   try {
-    console.log("🚀 ~ updateCompanyInformation ~ input data:", data);
-
     const supabase = await createClient();
-
+    
     const companyData = {
       company_name: data.company_name,
       email: data.email,
@@ -48,6 +46,71 @@ export async function updateCompanyInformation(data) {
     };
   } catch (error) {
     console.error("🔥 updateCompanyInformation unexpected error:", error);
+    return {
+      success: false,
+      error: error.message || "An unexpected error occurred",
+    };
+  }
+}
+
+export async function uploadCompanyLogo(formData) {
+  try {
+
+    const supabase = await createClient();
+    const file = formData.get("file");
+    const clientId = formData.get("client_id");
+
+
+    if (!file || !clientId) {
+      return { success: false, error: "File and client ID are required" };
+    }
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${clientId}-${Date.now()}.${fileExt}`;
+    const filePath = `${clientId}/${fileName}`;
+
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from("logos")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error("❌ Storage upload error:", uploadError);
+      return { success: false, error: uploadError.message };
+    }
+
+
+    // الحصول على URL العام
+    const { data: urlData } = supabase.storage
+      .from("logos")
+      .getPublicUrl(filePath);
+
+    const publicUrl = urlData.publicUrl;
+
+    const { data: updateData, error: updateError } = await supabase
+      .from("company_information")
+      .update({ logo_url: publicUrl })
+      .eq("client_id", clientId)
+      .select();
+
+    if (updateError) {
+      console.error("❌ Database update error:", updateError);
+      return { success: false, error: updateError.message };
+    }
+
+    console.log("✅ Database updated:", updateData);
+
+    revalidatePath("/dashboard/company");
+
+    return {
+      success: true,
+      message: "Logo uploaded successfully",
+      data: { logo_url: publicUrl, company: updateData },
+    };
+  } catch (error) {
+    console.error("🔥 uploadCompanyLogo unexpected error:", error);
     return {
       success: false,
       error: error.message || "An unexpected error occurred",
