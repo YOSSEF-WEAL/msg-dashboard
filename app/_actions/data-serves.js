@@ -70,7 +70,7 @@ export async function getIndustrys() {
 export async function getPaymentMethods() {
   const supabase = await createServerSupabase();
 
-  let { data: paymentMethods, error } = await supabase
+  let { data: payment_methods, error } = await supabase
     .from("payment_methods")
     .select("*");
 
@@ -79,5 +79,31 @@ export async function getPaymentMethods() {
     throw new Error("Failed to load payment methods");
   }
 
-  return paymentMethods ?? null;
+  return payment_methods ?? null;
+}
+
+export async function getPlans() {
+  const supabase = await createServerSupabase();
+
+  let { data: plans, error } = await supabase.from("plans").select("*");
+
+  if (error) {
+    console.error("getPlans error:", error);
+    throw new Error("Failed to load Plans methods");
+  }
+
+  return plans ?? null;
+}
+
+export async function getRoles() {
+  const supabase = await createServerSupabase();
+
+  let { data: roles, error } = await supabase.from("roles").select("*");
+
+  if (error) {
+    console.error("getroles error:", error);
+    throw new Error("Failed to load roles ");
+  }
+
+  return roles ?? null;
 }

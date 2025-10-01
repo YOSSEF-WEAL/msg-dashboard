@@ -39,13 +39,13 @@ export default function CompanyForm({
   countrys,
   industrys,
   paymentMethods,
+  plans,
 }) {
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = async (formData) => {
     const plainData = Object.fromEntries(formData.entries());
     plainData.client_id = client?.id;
-
 
     startTransition(async () => {
       try {
@@ -158,6 +158,17 @@ export default function CompanyForm({
             data={industrys}
             selectId={companyInformation?.industry}
             disabled={isPending}
+          />
+        </div>
+
+        <div className="w-full md:w-[31%] flex flex-col gap-2">
+          <Label htmlFor="plan">plans</Label>
+          <ComboboxCompanyForm
+            name="plan"
+            data={plans}
+            selectId={companyInformation?.plan}
+            // disabled={isPending}
+            disabled={true}
           />
         </div>
 

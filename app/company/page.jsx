@@ -7,6 +7,8 @@ import { getCompanyInformation } from "../_actions/data-serves";
 import { getCountrys } from "../_actions/data-serves";
 import { getIndustrys } from "../_actions/data-serves";
 import { getPaymentMethods } from "../_actions/data-serves";
+import { getPlans } from "../_actions/data-serves";
+import { getRoles } from "../_actions/data-serves";
 import CompanyForm from "@/components/CompanyForm";
 
 export default async function page() {
@@ -22,13 +24,16 @@ export default async function page() {
   const countrys = await getCountrys();
   const industrys = await getIndustrys();
   const paymentMethods = await getPaymentMethods();
+  const plans = await getPlans();
+
   /*
-console.log("client data", client);
-console.log("companyInformation data", companyInformation);
-console.log("countrys data", countrys);
-console.log("industrys data", industrys);
-console.log("paymentMethods data", paymentMethods);
-*/
+  console.log("companyInformation data", companyInformation);
+  console.log("client data", client);
+  console.log("countrys data", countrys);
+  console.log("industrys data", industrys);
+  console.log("paymentMethods data", paymentMethods);
+  console.log("plans data", plans);
+  */
 
   return (
     <div className="">
@@ -38,6 +43,7 @@ console.log("paymentMethods data", paymentMethods);
         countrys={countrys}
         industrys={industrys}
         paymentMethods={paymentMethods}
+        plans={plans}
       />
     </div>
   );
