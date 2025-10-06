@@ -2,8 +2,8 @@ import { redirect } from "next/navigation";
 
 import { LogoutButton } from "@/components/logout-button";
 import { createClient } from "@/lib/server";
-import SessionsActions from "@/components/SessionsActions";
 import { getClient } from "../_actions/data-serves";
+import SessionsActions from "@/components/sessions/SessionsActions";
 
 export default async function page() {
   const supabase = await createClient();
