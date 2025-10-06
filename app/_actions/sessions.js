@@ -136,19 +136,18 @@ export async function createWhatsAppSession(
 
     const wahaStatus = sessionData.status || "STARTING";
     const now = new Date().toISOString();
-
     const { data: session, error: dbError } = await supabase
       .from("sessions")
       .insert({
         waha_session_id: sessionId,
         phone_number: phoneNumber,
+        session_name: sessionName || `Session-${phoneNumber}`,
         status: wahaStatus,
         company_id: companyId,
         started_at: now,
         created_at: now,
         updated_at: now,
         last_synced_at: now,
-        session_name: sessionName || `Session-${phoneNumber}`,
       })
       .select()
       .single();
