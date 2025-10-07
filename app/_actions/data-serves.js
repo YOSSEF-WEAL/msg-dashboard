@@ -10,7 +10,33 @@ export async function getClient(userId) {
 
   let { data: clients, error } = await supabase
     .from("clients")
-    .select("*")
+    .select(
+      `
+    *,
+    roles:role (
+      id,
+      name,
+      slug,
+      permissions
+    ),
+    company_information:company_id (
+      id,
+      company_name,
+      plan,
+      plans:plan (
+        id,
+        name,
+        slug,
+        max_sessions,
+        max_contacts,
+        max_agents,
+        message_limit,
+        features,
+        restrictions
+      )
+    )
+  `
+    )
     .eq("user_id", userId)
     .limit(1)
     .maybeSingle();

@@ -5,10 +5,9 @@ import {
   LayoutDashboard,
   Inbox,
   Building2,
-  ShieldPlus ,
+  ShieldPlus,
   Settings,
   User2,
-
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -38,6 +37,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { useLoadClient } from "@/app/_hooks/useLoadClient";
 
 // Menu items.
 const items = [
@@ -49,7 +49,7 @@ const items = [
   {
     title: "Sessions",
     url: "/sessions",
-    icon: ShieldPlus ,
+    icon: ShieldPlus,
   },
   {
     title: "Company",
@@ -71,8 +71,7 @@ const items = [
 export default function AppSidebar() {
   const router = useRouter();
   const { user, loading } = useAuth();
-
-
+  useLoadClient();
 
   async function handleLogout() {
     const { error } = await logout();
@@ -80,17 +79,16 @@ export default function AppSidebar() {
     router.refresh();
   }
 
-  const displayName = user?.user_metadata?.full_name
-    || (user?.email ? user.email.split("@")[0] : null)
-    || "Account";
-  const avatarUrl: string | undefined = (user?.user_metadata?.avatar_url as string | undefined)
-    || (user?.user_metadata?.picture as string | undefined)
-    || undefined;
+  const displayName =
+    user?.user_metadata?.full_name ||
+    (user?.email ? user.email.split("@")[0] : null) ||
+    "Account";
+  const avatarUrl: string | undefined =
+    (user?.user_metadata?.avatar_url as string | undefined) ||
+    (user?.user_metadata?.picture as string | undefined) ||
+    undefined;
   const initials = (displayName?.[0] || "U").toUpperCase();
 
-
-
-  
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="py-4">
@@ -98,12 +96,7 @@ export default function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link href="/">
-                <Image
-                  src="/logo.png"
-                  alt="logo"
-                  width={30}
-                  height={30}
-                />
+                <Image src="/logo.png" alt="logo" width={30} height={30} />
                 MSG-Dashboard
               </Link>
             </SidebarMenuButton>
@@ -132,7 +125,6 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
@@ -144,8 +136,14 @@ export default function AppSidebar() {
                     {user ? (
                       <>
                         <Avatar className="size-6">
-                          <AvatarImage className="" src={avatarUrl} alt={displayName} />
-                          <AvatarFallback className="">{initials}</AvatarFallback>
+                          <AvatarImage
+                            className=""
+                            src={avatarUrl}
+                            alt={displayName}
+                          />
+                          <AvatarFallback className="">
+                            {initials}
+                          </AvatarFallback>
                         </Avatar>
                         <span>{displayName}</span>
                         <ChevronUp className="ml-auto" />
@@ -164,7 +162,7 @@ export default function AppSidebar() {
                 {user && (
                   <>
                     <Link href="/account">
-                    <DropdownMenuItem>Account</DropdownMenuItem>
+                      <DropdownMenuItem>Account</DropdownMenuItem>
                     </Link>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                   </>

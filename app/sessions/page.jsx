@@ -15,6 +15,7 @@ export default async function page() {
   const user_id = data?.claims?.sub;
 
   const client = await getClient(user_id);
+  // console.log("🚀 ~ page ~ client:", client);
 
   return (
     <div className="">

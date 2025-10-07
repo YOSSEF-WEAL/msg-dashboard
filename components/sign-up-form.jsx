@@ -16,6 +16,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { useDispatch } from "react-redux";
+import { setClient } from "@/app/store/features/userSlice";
+import { getClient } from "@/app/_actions/data-serves";
+
 export function SignUpForm({ className, ...props }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -23,6 +27,8 @@ export function SignUpForm({ className, ...props }) {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const dispatch = useDispatch();
 
   const handleSignUp = async (e) => {
     e.preventDefault();
@@ -68,41 +74,42 @@ export function SignUpForm({ className, ...props }) {
         throw authError;
       }
 
-      if (authData.user) {
-        console.log(
-          "✅ User created successfully:",
-          authData.user.id,
-          authData.user.email
-        );
-
-        try {
-          const { setupNewAccount } = await import("@/app/_actions/auth");
-
-          const result = await setupNewAccount({
-            user_id: authData.user.id,
-            email: email,
-            company_name: companyName,
-            full_name: fullName,
-          });
-          if (result.success) {
-            router.push("/company");
-          } else {
-            console.error("❌ Setup failed:", result.error);
-            setError(
-              "Account created, but there was an issue with company setup. Please contact support."
-            );
-            router.push("/company");
-          }
-        } catch (setupError) {
-          console.error("🔥 Setup error:", setupError);
-          setError(
-            "Account created successfully! You can now setup your company details."
-          );
-          router.push("/company");
-        }
-      } else {
+      if (!authData.user) {
         throw new Error("User creation failed - no user data returned");
       }
+
+      const { setupNewAccount } = await import("@/app/_actions/auth");
+      const result = await setupNewAccount({
+        user_id: authData.user.id,
+        email: email,
+        company_name: companyName,
+        full_name: fullName,
+      });
+
+      if (!result.success) {
+        console.error("❌ Setup failed:", result.error);
+        setError(
+          "Account created, but there was an issue with company setup. Please contact support."
+        );
+        router.push("/company");
+        return;
+      }
+
+      // ✅ بعد ما يتم إنشاء الحساب بالكامل، نحمل بيانات العميل في Redux
+      try {
+        const client = await getClient(authData.user.id);
+        if (client) {
+          dispatch(setClient(client)); // 🧠 تخزين بيانات المستخدم في Redux
+          console.log("✅ Client loaded into Redux:", client.name);
+        } else {
+          console.warn("⚠️ No client data found after setup.");
+        }
+      } catch (fetchError) {
+        console.error("❌ Error fetching client after signup:", fetchError);
+      }
+
+      // ✅ تحويل المستخدم بعد التسجيل الناجح
+      router.push("/company");
     } catch (error) {
       console.error("🚨 Signup error:", error);
       setError(

@@ -87,16 +87,16 @@ export default function SessionsTable({
                     <DropdownMenuContent align="end">
                       {s.status?.toUpperCase() !== "WORKING" && (
                         <DropdownMenuItem onClick={() => onScanQR(s)}>
-                          <QrCode className="h-4 w-4 mr-2" /> Scan QR
+                          <QrCode className="h-4 w-4 " /> Scan QR
                         </DropdownMenuItem>
                       )}
                       {s.status?.toUpperCase() !== "STOPPED" && (
                         <DropdownMenuItem onClick={() => onStop(s)}>
-                          <StopCircle className="h-4 w-4 mr-2" /> Stop
+                          <StopCircle className="h-4 w-4 " /> Stop
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem onClick={() => onDelete(s)}>
-                        <Trash2 className="h-4 w-4 mr-2" /> Delete
+                        <Trash2 className="h-4 w-4 " /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

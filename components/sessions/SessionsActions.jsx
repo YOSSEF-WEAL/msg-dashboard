@@ -53,13 +53,13 @@ export default function SessionsActions({ client }) {
             disabled={refreshing}
           >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${refreshing ? "animate-spin" : ""}`}
+              className={`h-4 w-4  ${refreshing ? "animate-spin" : ""}`}
             />
             {refreshing ? "Refreshing..." : "Reload Sessions"}
           </Button>
 
           <Button onClick={handleOpenAdd}>
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 " />
             Add Session
           </Button>
         </div>
