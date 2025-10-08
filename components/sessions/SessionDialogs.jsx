@@ -42,6 +42,7 @@ export default function SessionDialogs({
     phoneNumber: "",
     sessionName: "",
   });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (!addDialogOpen) {
@@ -118,12 +119,27 @@ export default function SessionDialogs({
           <DialogFooter>
             <Button
               variant="outline"
+              disabled={isDeleting}
               onClick={() => setDeleteDialogOpen(false)}
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={onConfirmDelete}>
-              Delete
+            <Button
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={async () => {
+                try {
+                  setIsDeleting(true);
+                  await onConfirmDelete();
+                  setDeleteDialogOpen(false);
+                } catch (err) {
+                  console.error("Error deleting session:", err);
+                } finally {
+                  setIsDeleting(false);
+                }
+              }}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>

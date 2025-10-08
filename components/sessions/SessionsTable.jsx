@@ -13,8 +13,15 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical, QrCode, Trash2, StopCircle } from "lucide-react";
+import {
+  EllipsisVertical,
+  QrCode,
+  Trash2,
+  StopCircle,
+  MessageCircleMore,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function SessionsTable({
   sessions = [],
@@ -85,6 +92,14 @@ export default function SessionsTable({
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      {s.status?.toUpperCase() == "WORKING" && (
+                        <Link href={`/sessions/${s.id}/chat`}>
+                          <DropdownMenuItem>
+                            <MessageCircleMore className="h-4 w-4 " />
+                            Live Chat
+                          </DropdownMenuItem>
+                        </Link>
+                      )}
                       {s.status?.toUpperCase() !== "WORKING" && (
                         <DropdownMenuItem onClick={() => onScanQR(s)}>
                           <QrCode className="h-4 w-4 " /> Scan QR

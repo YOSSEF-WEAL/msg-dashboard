@@ -71,7 +71,6 @@ const items = [
 export default function AppSidebar() {
   const router = useRouter();
   const { user, loading } = useAuth();
-  useLoadClient();
 
   async function handleLogout() {
     const { error } = await logout();
@@ -88,6 +87,8 @@ export default function AppSidebar() {
     (user?.user_metadata?.picture as string | undefined) ||
     undefined;
   const initials = (displayName?.[0] || "U").toUpperCase();
+
+  useLoadClient();
 
   return (
     <Sidebar collapsible="icon">

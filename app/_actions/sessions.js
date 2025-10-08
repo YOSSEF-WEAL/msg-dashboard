@@ -2,8 +2,8 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-const WAHA_API_URL = process.env.WAHA_API_URL;
-const WAHA_API_KEY = process.env.WAHA_API_KEY;
+const NEXT_PUBLIC_WAHA_API_URL = process.env.NEXT_PUBLIC_WAHA_API_URL;
+const NEXT_PUBLIC_WAHA_API_KEY = process.env.NEXT_PUBLIC_WAHA_API_KEY;
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -41,9 +41,10 @@ function getSupabaseAdmin() {
 
 // Helper function to get WAHA session status
 async function fetchWahaStatus(wahaSessionId) {
-  if (!WAHA_API_URL || !WAHA_API_KEY || !wahaSessionId) return null;
+  if (!NEXT_PUBLIC_WAHA_API_URL || !NEXT_PUBLIC_WAHA_API_KEY || !wahaSessionId)
+    return null;
 
-  const cleanUrl = cleanApiUrl(WAHA_API_URL);
+  const cleanUrl = cleanApiUrl(NEXT_PUBLIC_WAHA_API_URL);
   const endpoints = [
     `${cleanUrl}/api/sessions/${wahaSessionId}`,
     `${cleanUrl}/api/${wahaSessionId}`,
@@ -53,7 +54,7 @@ async function fetchWahaStatus(wahaSessionId) {
     try {
       const res = await fetch(url, {
         method: "GET",
-        headers: { "X-Api-Key": WAHA_API_KEY },
+        headers: { "X-Api-Key": NEXT_PUBLIC_WAHA_API_KEY },
       });
       if (res.ok) {
         const data = await res.json();
@@ -74,11 +75,11 @@ export async function createWhatsAppSession(
   try {
     const supabase = getSupabaseAdmin();
 
-    if (!WAHA_API_URL || !WAHA_API_KEY) {
+    if (!NEXT_PUBLIC_WAHA_API_URL || !NEXT_PUBLIC_WAHA_API_KEY) {
       throw new Error("WAHA API configuration is missing");
     }
 
-    const cleanUrl = cleanApiUrl(WAHA_API_URL);
+    const cleanUrl = cleanApiUrl(NEXT_PUBLIC_WAHA_API_URL);
     const sessionId = "default";
 
     const { data: existingSession, error: fetchErr } = await supabase
@@ -116,7 +117,7 @@ export async function createWhatsAppSession(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Api-Key": WAHA_API_KEY,
+        "X-Api-Key": NEXT_PUBLIC_WAHA_API_KEY,
       },
       body: JSON.stringify(requestBody),
     });
@@ -223,12 +224,12 @@ export async function deleteSession(sessionId) {
 
     if (fetchError) throw fetchError;
 
-    const cleanUrl = cleanApiUrl(WAHA_API_URL);
+    const cleanUrl = cleanApiUrl(NEXT_PUBLIC_WAHA_API_URL);
     const wahaResponse = await fetch(
       `${cleanUrl}/api/sessions/${session.waha_session_id}`,
       {
         method: "DELETE",
-        headers: { "X-Api-Key": WAHA_API_KEY },
+        headers: { "X-Api-Key": NEXT_PUBLIC_WAHA_API_KEY },
       }
     );
 
@@ -266,7 +267,7 @@ export async function getSessionQRCode(sessionId) {
 
     if (fetchError) throw fetchError;
 
-    const cleanUrl = cleanApiUrl(WAHA_API_URL);
+    const cleanUrl = cleanApiUrl(NEXT_PUBLIC_WAHA_API_URL);
 
     const endpoints = [
       `/api/${session.waha_session_id}/auth/qr`,
@@ -284,7 +285,7 @@ export async function getSessionQRCode(sessionId) {
         const response = await fetch(fullUrl, {
           method: "GET",
           headers: {
-            "X-Api-Key": WAHA_API_KEY,
+            "X-Api-Key": NEXT_PUBLIC_WAHA_API_KEY,
             Accept: "application/json, image/png, image/jpeg, text/plain, */*",
           },
         });
@@ -345,16 +346,16 @@ export async function updateSessionStatus(wahaSessionId, sessionId, newStatus) {
   try {
     const supabase = getSupabaseAdmin();
 
-    if (!WAHA_API_URL || !WAHA_API_KEY) {
+    if (!NEXT_PUBLIC_WAHA_API_URL || !NEXT_PUBLIC_WAHA_API_KEY) {
       throw new Error("WAHA API configuration is missing");
     }
 
-    const cleanUrl = cleanApiUrl(WAHA_API_URL);
+    const cleanUrl = cleanApiUrl(NEXT_PUBLIC_WAHA_API_URL);
     const statusUrl = `${cleanUrl}/api/sessions/${wahaSessionId}`;
 
     const statusResponse = await fetch(statusUrl, {
       method: "GET",
-      headers: { "X-Api-Key": WAHA_API_KEY },
+      headers: { "X-Api-Key": NEXT_PUBLIC_WAHA_API_KEY },
     });
 
     let currentWahaStatus = null;
@@ -384,7 +385,7 @@ export async function updateSessionStatus(wahaSessionId, sessionId, newStatus) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Api-Key": WAHA_API_KEY,
+          "X-Api-Key": NEXT_PUBLIC_WAHA_API_KEY,
         },
       });
       const wahaResponseText = await wahaResponse.text();

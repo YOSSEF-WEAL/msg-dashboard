@@ -10,18 +10,18 @@ import { toast } from "sonner";
 
 /**
  * useSessions hook
- * - يدير جميع ال API calls و intervals و QR monitoring
- * - يبقي qrDialog state داخل ال hook لأنه متعلق بالمراقبة التلقائية
+ * Manages all API calls, intervals, and QR monitoring.
  */
-export function useSessions(clientId) {
+export function useSessions(companyId) {
   const [sessions, setSessions] = useState([]);
-  const [loading, setLoading] = useState(false); // CRUD ops (create / delete / stop)
-  const [refreshing, setRefreshing] = useState(false); // auto-refresh state
+  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [qrCode, setQrCode] = useState(null);
   const [qrLoading, setQrLoading] = useState(false);
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [currentSession, setCurrentSession] = useState(null);
   const [countdown, setCountdown] = useState(0);
+  const [error, setError] = useState(null);
 
   const autoRefreshRef = useRef(null);
   const qrIntervalRef = useRef(null);
@@ -30,36 +30,56 @@ export function useSessions(clientId) {
   const UPDATE_INTERVAL = 3000;
   const QR_COUNTDOWN = 60 * 2;
 
-  // fetchSessions (uses refreshing, not loading)
-  const fetchSessions = useCallback(async () => {
-    try {
-      setRefreshing(true);
-      const res = await getCompanySessions(clientId);
-      if (res?.success) {
-        setSessions(res.data || []);
-      } else {
-        toast.error(res?.error || "Failed to fetch sessions");
-      }
-    } catch (err) {
-      console.error("fetchSessions error", err);
-      toast.error("Unexpected error fetching sessions");
-    } finally {
-      setRefreshing(false);
-    }
-  }, [clientId]);
+  // Fetch sessions
+  const fetchSessions = useCallback(
+    async (showLoading = false) => {
+      if (!companyId) return;
 
-  // create session
+      try {
+        if (showLoading) setRefreshing(true);
+        setError(null);
+
+        const res = await getCompanySessions(companyId);
+        if (res?.success) {
+          setSessions((prev) => {
+            const newData = res.data || [];
+            const hasChanged = JSON.stringify(prev) !== JSON.stringify(newData);
+            return hasChanged ? newData : prev;
+          });
+        } else {
+          const errorMsg = res?.error || "Failed to fetch sessions";
+          setError(errorMsg);
+          toast.error(errorMsg);
+        }
+      } catch (err) {
+        console.error("fetchSessions error", err);
+        const errorMsg = "Unexpected error fetching sessions";
+        setError(errorMsg);
+        toast.error(errorMsg);
+      } finally {
+        if (showLoading) setRefreshing(false);
+      }
+    },
+    [companyId]
+  );
+
+  // Create session
   const createSession = useCallback(
     async (phoneNumber, sessionName) => {
+      if (!companyId) {
+        toast.error("Missing company ID. Please reload your account.");
+        return { success: false, error: "Missing company ID" };
+      }
+
       try {
         setLoading(true);
         const res = await createWhatsAppSession(
-          clientId,
+          companyId,
           phoneNumber,
           sessionName
         );
         if (res?.success) {
-          toast.success("Session created");
+          toast.success("Session created successfully");
           await fetchSessions();
           return { success: true, data: res.data };
         } else {
@@ -74,12 +94,13 @@ export function useSessions(clientId) {
         setLoading(false);
       }
     },
-    [clientId, fetchSessions]
+    [companyId, fetchSessions]
   );
 
-  // delete session
+  // Delete session
   const deleteSessionById = useCallback(
     async (sessionId) => {
+      if (!sessionId) return;
       try {
         setLoading(true);
         const res = await deleteSession(sessionId);
@@ -102,9 +123,10 @@ export function useSessions(clientId) {
     [fetchSessions]
   );
 
-  // stop session
+  // Stop session
   const stopSession = useCallback(
     async (session) => {
+      if (!session?.id) return;
       try {
         setLoading(true);
         const res = await updateSessionStatus(
@@ -131,30 +153,29 @@ export function useSessions(clientId) {
     [fetchSessions]
   );
 
-  // Close QR dialog and cleanup
+  // Close QR dialog
   const closeQrDialog = useCallback(async () => {
     try {
       setQrDialogOpen(false);
       setCurrentSession(null);
       setQrCode(null);
       setCountdown(0);
-      // clear intervals
       clearInterval(qrIntervalRef.current);
       clearInterval(countdownIntervalRef.current);
       qrIntervalRef.current = null;
       countdownIntervalRef.current = null;
-      // refresh sessions when closing
       await fetchSessions();
     } catch (err) {
       console.error("closeQrDialog error", err);
     }
   }, [fetchSessions]);
 
-  // Internal: check session status by fetching latest sessions and finding this session
+  // Check session status
   const checkSessionStatus = useCallback(
     async (sessionId) => {
+      if (!companyId) return null;
       try {
-        const res = await getCompanySessions(clientId);
+        const res = await getCompanySessions(companyId);
         if (res?.success) {
           const updated = (res.data || []).find((s) => s.id === sessionId);
           return updated || null;
@@ -164,23 +185,27 @@ export function useSessions(clientId) {
       }
       return null;
     },
-    [clientId]
+    [companyId]
   );
 
-  // Start watching session status and QR countdown
+  // Open QR code
   const openQRCode = useCallback(
     async (session) => {
+      if (!companyId || !session?.id) {
+        toast.error("Missing company or session data");
+        return;
+      }
+
       try {
-        // open dialog UI
         setQrLoading(true);
         setQrCode(null);
         setCurrentSession(session);
         setQrDialogOpen(true);
         setCountdown(QR_COUNTDOWN);
 
-        // if session not in SCAN_QR_CODE / STARTING -> request SCAN_QR_CODE
         const curStatus = (session.status || "").toUpperCase();
         const allowed = ["SCAN_QR_CODE", "STARTING"];
+
         if (!allowed.includes(curStatus)) {
           const statusResult = await updateSessionStatus(
             session.waha_session_id,
@@ -193,11 +218,9 @@ export function useSessions(clientId) {
             setQrLoading(false);
             return;
           }
-          // small delay to let backend set status
           await new Promise((r) => setTimeout(r, 1200));
         }
 
-        // get QR
         const qrRes = await getSessionQRCode(session.id);
         if (!qrRes?.success || !qrRes.data?.qr) {
           toast.error(qrRes?.error || "Failed to get QR code");
@@ -210,14 +233,13 @@ export function useSessions(clientId) {
         toast.success("QR code ready");
         setQrLoading(false);
 
-        // start countdown interval
+        // Countdown timer
         countdownIntervalRef.current = setInterval(() => {
           setCountdown((prev) => {
             if (prev <= 1) {
               clearInterval(countdownIntervalRef.current);
               countdownIntervalRef.current = null;
               toast.info("QR expired");
-              // close dialog and cleanup
               closeQrDialog();
               return 0;
             }
@@ -225,19 +247,17 @@ export function useSessions(clientId) {
           });
         }, 1000);
 
-        // start monitoring server-side status every 3s
+        // Status monitoring
         qrIntervalRef.current = setInterval(async () => {
           try {
             const updated = await checkSessionStatus(session.id);
             if (updated) {
               const st = (updated.status || "").toUpperCase();
-              console.log("QR monitor - session:", updated.session_name, st);
               if (["WORKING", "FAILED", "STOPPED"].includes(st)) {
-                // status changed -> close dialog & refresh
                 toast.success(`Session ${st}`);
                 clearInterval(qrIntervalRef.current);
-                qrIntervalRef.current = null;
                 clearInterval(countdownIntervalRef.current);
+                qrIntervalRef.current = null;
                 countdownIntervalRef.current = null;
                 setQrDialogOpen(false);
                 setCurrentSession(null);
@@ -245,7 +265,6 @@ export function useSessions(clientId) {
                 setCountdown(0);
                 await fetchSessions();
               } else {
-                // also refresh sessions list so UI shows latest status
                 await fetchSessions();
               }
             }
@@ -260,28 +279,33 @@ export function useSessions(clientId) {
         setQrDialogOpen(false);
       }
     },
-    [checkSessionStatus, closeQrDialog, fetchSessions]
+    [checkSessionStatus, closeQrDialog, fetchSessions, companyId]
   );
 
-  // Expose a manual close method
   const manualCloseQRCode = useCallback(async () => {
     await closeQrDialog();
   }, [closeQrDialog]);
 
-  // setup auto refresh when hook mounted
+  // Initial setup - only run when companyId is available
   useEffect(() => {
-    fetchSessions();
-    autoRefreshRef.current = setInterval(fetchSessions, UPDATE_INTERVAL);
+    if (!companyId) return;
 
+    fetchSessions(true);
+
+    autoRefreshRef.current = setInterval(
+      () => fetchSessions(false),
+      UPDATE_INTERVAL
+    );
+
+    // Cleanup on unmount or when companyId changes
     return () => {
       clearInterval(autoRefreshRef.current);
       clearInterval(qrIntervalRef.current);
       clearInterval(countdownIntervalRef.current);
     };
-  }, [fetchSessions]);
+  }, [fetchSessions, companyId]);
 
   return {
-    // data
     sessions,
     loading,
     refreshing,
@@ -290,8 +314,7 @@ export function useSessions(clientId) {
     qrDialogOpen,
     currentSession,
     countdown,
-
-    // actions
+    error,
     fetchSessions,
     createSession,
     deleteSessionById,
