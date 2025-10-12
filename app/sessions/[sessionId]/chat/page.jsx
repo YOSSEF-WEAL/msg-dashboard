@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import ChatList from "./components/ChatList";
+import ChatWindow from "./components/ChatWindow";
 import { fetchChats } from "./components/data-chats";
 
 export default function ChatPage({ params }) {
@@ -13,26 +14,17 @@ export default function ChatPage({ params }) {
   const [offset, setOffset] = useState(0);
 
   useEffect(() => {
-    let isMounted = true;
-    let lastChats = [];
-
-    const loadInitialChats = async () => {
+    const loadChats = async () => {
       setLoading(true);
       const result = await fetchChats(sessionId, 0);
-      if (isMounted && result) {
-        setChats(result);
-        lastChats = result;
-        setOffset(result.length);
-        setLoading(false);
-      }
+      setChats(result);
+      setOffset(result.length);
+      setLoading(false);
     };
-
-    loadInitialChats();
-
-    return () => {
-      isMounted = false;
-    };
+    loadChats();
   }, [sessionId]);
+
+  const handleSelectChat = (chatId) => setActiveChat(chatId);
 
   const handleLoadMore = async () => {
     const newChats = await fetchChats(sessionId, offset);
@@ -42,12 +34,8 @@ export default function ChatPage({ params }) {
     }
   };
 
-  const handleSelectChat = (chatId) => {
-    setActiveChat(chatId);
-  };
-
   return (
-    <Card className="flex h-screen p-0">
+    <Card className="flex flex-row h-screen w-full p-0">
       <ChatList
         sessionId={sessionId}
         chats={chats}
@@ -56,6 +44,15 @@ export default function ChatPage({ params }) {
         onLoadMore={handleLoadMore}
         loading={loading}
       />
+      <div className="flex-1 border-l border-border">
+        {activeChat ? (
+          <ChatWindow sessionId={sessionId} chatId={activeChat} />
+        ) : (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            Select a chat to start messaging
+          </div>
+        )}
+      </div>
     </Card>
   );
 }

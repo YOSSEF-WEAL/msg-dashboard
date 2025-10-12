@@ -1,46 +1,63 @@
 /**
- * Fetch WhatsApp chats from WAHA API for a given session.
+ * ✅ Helper: Detect the real session name (Core uses only 'default')
  */
-export async function fetchChats(sessionId, offset = 0, limit = 20) {
+
+const baseUrl =
+  process.env.NEXT_PUBLIC_WAHA_API_URL || process.env.WAHA_API_URL;
+const apiKey = process.env.NEXT_PUBLIC_WAHA_API_KEY || process.env.WAHA_API_KEY;
+
+async function resolveSessionName(sessionId) {
   try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_WAHA_API_URL || process.env.WAHA_API_URL;
-    const apiKey =
-      process.env.NEXT_PUBLIC_WAHA_API_KEY || process.env.WAHA_API_KEY;
-
-    if (!baseUrl) throw new Error("WAHA_API_URL not defined");
-
     const headers = { "Content-Type": "application/json" };
     if (apiKey) headers["Authorization"] = `ApiKey ${apiKey}`;
 
-    // ✅ 1. Get sessions
     const sessionsRes = await fetch(`${baseUrl}/api/sessions`, {
       headers,
       cache: "no-store",
     });
 
-    if (!sessionsRes.ok)
-      throw new Error(`WAHA sessions fetch failed: ${sessionsRes.status}`);
+    if (!sessionsRes.ok) {
+      console.warn("⚠️ Could not fetch sessions, fallback to 'default'");
+      return "default";
+    }
 
     const sessions = await sessionsRes.json();
-    const sessionObj =
+
+    // ✅ If WAHA Core → use only "default"
+    if (sessions.length === 1 && sessions[0].name === "default") {
+      return "default";
+    }
+
+    // ✅ Otherwise find matching session (Plus)
+    const found =
       sessions.find(
         (s) =>
           s.id?.toString() === sessionId?.toString() ||
           s.name?.toString() === sessionId?.toString()
       ) || sessions[0];
 
-    if (!sessionObj) throw new Error("No valid WAHA session found");
+    return found?.name || found?.id || "default";
+  } catch (err) {
+    console.warn("⚠️ Session detection failed, fallback to 'default'");
+    return "default";
+  }
+}
 
-    const realSession = sessionObj.name || sessionObj.id;
+/**
+ * ✅ Fetch WhatsApp chats (with pagination)
+ */
+export async function fetchChats(sessionId, offset = 0, limit = 20) {
+  try {
+    if (!baseUrl) throw new Error("WAHA_API_URL not defined");
 
-    // ✅ 2. Fetch chats with pagination
+    const headers = { "Content-Type": "application/json" };
+    if (apiKey) headers["Authorization"] = `ApiKey ${apiKey}`;
+
+    const realSession = await resolveSessionName(sessionId);
+
     const chatsRes = await fetch(
       `${baseUrl}/api/${realSession}/chats/overview?limit=${limit}&offset=${offset}`,
-      {
-        headers,
-        cache: "no-store",
-      }
+      { headers, cache: "no-store" }
     );
 
     const text = await chatsRes.text();
@@ -49,7 +66,6 @@ export async function fetchChats(sessionId, offset = 0, limit = 20) {
 
     const data = JSON.parse(text);
 
-    // ✅ 3. Normalize
     return data.map((chat) => ({
       id: chat.id,
       name: chat.name || chat.id,
@@ -63,5 +79,84 @@ export async function fetchChats(sessionId, offset = 0, limit = 20) {
   } catch (error) {
     console.error("❌ Error fetching chats:", error);
     return [];
+  }
+}
+
+/**
+ * ✅ Fetch messages for a chat (with pagination)
+ */
+
+export async function fetchMessages(sessionId, chatId, offset = 0, limit = 20) {
+  try {
+    if (!baseUrl) throw new Error("WAHA_API_URL not defined");
+
+    const headers = { "Content-Type": "application/json" };
+    if (apiKey) headers["Authorization"] = `Bearer ${apiKey}`;
+
+    const realSession = await resolveSessionName(sessionId);
+
+    const res = await fetch(
+      `${baseUrl}/api/${realSession}/chats/${encodeURIComponent(
+        chatId
+      )}/messages?limit=${limit}&offset=${offset}`,
+      { headers, cache: "no-store" }
+    );
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Messages fetch failed: ${res.status} - ${text}`);
+    }
+
+    const data = await res.json();
+
+    return data.map((msg) => ({
+      id: msg.id,
+      fromMe: msg.fromMe,
+      text: msg.body || "",
+      timestamp: msg.timestamp
+        ? new Date(msg.timestamp * 1000).toISOString()
+        : new Date().toISOString(),
+      ack: msg.ack,
+      hasMedia: msg.hasMedia,
+    }));
+  } catch (error) {
+    console.error("❌ Error fetching messages:", error);
+    throw error;
+  }
+}
+
+/**
+ * ✅ Send a message
+ */
+export async function sendMessage(sessionId, chatId, text) {
+  try {
+    if (!baseUrl) throw new Error("WAHA_API_URL not defined");
+
+    const headers = { "Content-Type": "application/json" };
+    if (apiKey) headers["Authorization"] = `ApiKey ${apiKey}`;
+
+    const res = await fetch(`${baseUrl}/api/sendText`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        // session: sessionId || "default",
+        session: "default",
+        chatId,
+        text,
+        reply_to: null,
+        linkPreview: true,
+        linkPreviewHighQuality: false,
+      }),
+    });
+
+    if (!res.ok)
+      throw new Error(
+        `Send message failed: ${res.status} - ${await res.text()}`
+      );
+
+    return await res.json();
+  } catch (error) {
+    console.error("❌ Error sending message:", error);
+    return false;
   }
 }

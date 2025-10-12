@@ -18,7 +18,7 @@ export default function ChatList({
   loading,
   onLoadMore,
 }) {
-  //   console.log("🚀 ~ ChatList ~ chats:", chats);
+  // console.log("🚀 ~ ChatList ~ chats:", chats);
   const formatTime = (timestamp) => {
     try {
       return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
@@ -47,11 +47,11 @@ export default function ChatList({
   // Loading state
   if (loading) {
     return (
-      <Card className="w-80 h-full flex flex-col border-border bg-background">
+      <Card className="w-85 h-full flex flex-col border-border bg-background">
         <div className="p-4 border-b border-border">
           <Skeleton className="h-6 w-40" />
         </div>
-        <ScrollArea className="max-h-screen  overflow-hidden flex-1 p-0 gap-4">
+        <ScrollArea className="max-h-screen  overflow-hidden flex-1 p-0 gap-4 w-full">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i) => (
             <div key={i} className="flex items-center gap-3 mb-2 mx-auto px-4">
               <Skeleton className="h-12 w-12 rounded-full" />
@@ -69,7 +69,7 @@ export default function ChatList({
   // Empty state
   if (chats.length === 0) {
     return (
-      <Card className="w-80 h-full flex flex-col border-border bg-background">
+      <Card className="w-85 h-full flex flex-col border-border bg-background">
         <div className="p-4 border-b border-border">
           <h2 className="text-lg font-semibold">Chats</h2>
         </div>
@@ -83,7 +83,7 @@ export default function ChatList({
   }
 
   return (
-    <Card className="w-80 h-full flex flex-col border-border bg-background">
+    <Card className="w-85 h-full flex flex-col border-border bg-background">
       {/* Header */}
       <div className="p-4 border-b border-border">
         <h2 className="text-lg font-semibold">Chats</h2>
@@ -93,12 +93,12 @@ export default function ChatList({
       </div>
 
       {/* Chat List */}
-      <ScrollArea className="max-h-screen overflow-hidden flex-1 p-0">
+      <ScrollArea className="max-h-screen overflow-hidden flex-1 p-0 w-85">
         {chats.map((chat) => (
           <button
             key={chat.id}
             onClick={() => onSelectChat(chat.id)}
-            className={`w-80 p-4 flex items-start gap-3 text-left transition-colors 
+            className={`w-83 p-4 flex items-start gap-3 text-left transition-colors 
                 ${
                   activeChat === chat.id
                     ? "bg-primary/10 border-r-4 border-primary"
@@ -113,8 +113,10 @@ export default function ChatList({
             </Avatar>
 
             <div className="flex-1 min-w-0">
-              <div className="flex flex-col items-start justify-between mb-1">
-                <h3 className="font-medium text-sm truncate">{chat.name}</h3>
+              <div className="flex flex-col items-start justify-between mb-1 w-full overflow-hidden">
+                <h3 className="font-medium text-sm truncate line-clamp-1">
+                  {chat.name}
+                </h3>
               </div>
 
               <div className="flex items-center justify-between">
@@ -139,7 +141,7 @@ export default function ChatList({
 
         {/*  Loading more button */}
         <div className="flex flex-col items-center justify-center p-4">
-          <hr className="my-2 border-t border-border w-full" />
+          <hr className="my-2 border-t border-border w-full mb-4" />
           <Button
             onClick={handleLoadMoreClick}
             disabled={isLoadingMore}
