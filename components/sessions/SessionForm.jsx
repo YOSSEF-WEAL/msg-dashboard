@@ -30,15 +30,9 @@ export default function SessionForm({ formData, onChange, onSubmit, loading }) {
       </div>
 
       <div className="flex justify-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            /* parent will handle close */
-          }}
-        >
-          Cancel
-        </Button>
+        {/* <Button type="reset" variant="outline">
+          Reset
+        </Button> */}
         <Button type="submit" disabled={loading}>
           {loading ? "Creating..." : "Create Session"}
         </Button>

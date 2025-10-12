@@ -286,9 +286,15 @@ export function useSessions(companyId) {
     await closeQrDialog();
   }, [closeQrDialog]);
 
-  // Initial setup - only run when companyId is available
   useEffect(() => {
     if (!companyId) return;
+
+    const path = window.location.pathname;
+    const isSessionsPage = /^\/sessions\/?$/.test(path);
+
+    if (!isSessionsPage) {
+      return;
+    }
 
     fetchSessions(true);
 
@@ -297,11 +303,10 @@ export function useSessions(companyId) {
       UPDATE_INTERVAL
     );
 
-    // Cleanup on unmount or when companyId changes
     return () => {
-      clearInterval(autoRefreshRef.current);
-      clearInterval(qrIntervalRef.current);
-      clearInterval(countdownIntervalRef.current);
+      if (autoRefreshRef.current) {
+        clearInterval(autoRefreshRef.current);
+      }
     };
   }, [fetchSessions, companyId]);
 
